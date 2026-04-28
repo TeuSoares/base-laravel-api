@@ -19,14 +19,14 @@ test('should reset password successfully with valid token', function () {
     $response = postJson(route('auth.reset-password'), [
         'token' => $token,
         'email' => 'user@example.com',
-        'password' => 'NewPassword123!',
-        'password_confirmation' => 'NewPassword123!',
+        'password' => 'SafePass123!',
+        'password_confirmation' => 'SafePass123!',
     ]);
 
     $response->assertOk()
         ->assertJsonPath('message', __('auth.password_reset_success'));
 
-    expect(Hash::check('NewPassword123!', $user->refresh()->password))->toBeTrue();
+    expect(Hash::check('SafePass123!', $user->refresh()->password))->toBeTrue();
 });
 
 test('should fail reset if token is invalid', function () {
@@ -35,8 +35,8 @@ test('should fail reset if token is invalid', function () {
     postJson(route('auth.reset-password'), [
         'token' => 'invalid-token',
         'email' => $user->email,
-        'password' => 'NewPassword123!',
-        'password_confirmation' => 'NewPassword123!',
+        'password' => 'SafePass123!',
+        'password_confirmation' => 'SafePass123!',
     ])
         ->assertStatus(422)
         ->assertJsonValidationErrors(['email']);
@@ -71,8 +71,8 @@ test('should fail if email does not exist', function () {
     postJson(route('auth.reset-password'), [
         'token' => $token,
         'email' => 'wrong@example.com',
-        'password' => 'NewPassword123!',
-        'password_confirmation' => 'NewPassword123!',
+        'password' => 'SafePass123!',
+        'password_confirmation' => 'SafePass123!',
     ])
         ->assertStatus(422)
         ->assertJsonValidationErrors(['email']);

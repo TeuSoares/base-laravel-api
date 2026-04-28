@@ -3,7 +3,7 @@
 namespace App\Modules\Auth\Requests;
 
 use App\Core\Abstracts\Request;
-use App\Modules\Auth\Enums\DocumentType;
+use App\Core\Enums\CountryCode;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Rules\Password;
 
@@ -14,35 +14,19 @@ class RegisterRequest extends Request
         return [
             'name'     => 'required|string|max:100',
             'email'    => 'required|email|max:255|unique:users',
-            'password' => ['required', Password::min(8)->max(12), 'confirmed'],
-            'password_confirmation' => 'required',
-
-            'document_type' => ['nullable', new Enum(DocumentType::class)],
-
-            'document_number' => $this->input('document_type') === DocumentType::CPF->value
-                ? 'nullable|digits:11|unique:users,document_number'
-                : 'nullable|string|max:20|unique:users,document_number',
-
-            'phone' => 'nullable|regex:/^\+?[0-9]{8,20}$/',
-
-            'birth_date' => [
-                'nullable',
-                'date',
-                'before:today',
-                'after:1900-01-01'
+            'password' => [
+                'required',
+                'confirmed',
+                Password::min(10)
+                    ->letters()
+                    ->numbers()
+                    ->uncompromised(),
             ],
-
-            'country_code' => 'nullable|string|max:5',
+            'password_confirmation' => 'required',
+            'country_code' => [
+                'required',
+                new Enum(CountryCode::class)
+            ],
         ];
-    }
-
-    protected function prepareForValidation(): void
-    {
-        if ($this->input('country_code') === 'BR' || $this->input('document_type') === 'CPF') {
-            $this->merge([
-                'document_number' => preg_replace('/\D/', '', $this->input('document_number', '')),
-                'phone'           => preg_replace('/\D/', '', $this->input('phone', '')),
-            ]);
-        }
     }
 }

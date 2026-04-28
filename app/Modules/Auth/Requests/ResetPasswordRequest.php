@@ -15,11 +15,12 @@ class ResetPasswordRequest extends Request
             'password' => [
                 'required',
                 'confirmed',
-                Password::min(8)
+                Password::min(10)
                     ->letters()
                     ->numbers()
-                    ->mixedCase()
+                    ->uncompromised(),
             ],
+            'password_confirmation' => 'required|string',
         ];
     }
 }

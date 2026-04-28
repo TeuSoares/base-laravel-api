@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Core\Enums\CountryCode;
 use App\Core\Enums\UserLanguage;
 use App\Modules\Auth\Notifications\ResetPasswordNotification;
-use App\Modules\Auth\Enums\DocumentType;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,11 +16,7 @@ use Laravel\Sanctum\HasApiTokens;
     'name',
     'email',
     'password',
-    'document_type',
-    'document_number',
-    'phone',
     'country_code',
-    'birth_date',
     'email_verified_at',
     'language',
 ])]
@@ -33,10 +29,9 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'birth_date'        => 'date',
-            'password'          => 'hashed',
-            'document_type'     => DocumentType::class,
-            'language'          => UserLanguage::class,
+            'password' => 'hashed',
+            'language' => UserLanguage::class,
+            'country_code' => CountryCode::class,
         ];
     }
 

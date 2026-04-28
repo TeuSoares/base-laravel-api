@@ -43,6 +43,11 @@ class AuthController extends Controller
     public function register(RegisterRequest $request, RegisterAction $registerAction): JsonResponse
     {
         $user = $registerAction->execute($request->validated());
+
+        if ($request->hasSession()) {
+            $request->session()->regenerate();
+        }
+
         return $this->response()->data(data: $user, message: __('auth.register_success'), status: 201);
     }
 

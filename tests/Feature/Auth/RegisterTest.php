@@ -1,21 +1,21 @@
 <?php
 
 use App\Models\User;
-use App\Modules\Auth\Enums\DocumentType;
 use function Pest\Laravel\{postJson, assertDatabaseHas, assertAuthenticated};
 
-test('should register a new user successfully with all fields and sanitize data', function () {
-    $userData = [
+function validRegistrationPayload(array $overrides = []): array
+{
+    return array_merge([
         'name' => 'Test User',
         'email' => 'register@example.com',
-        'document_type' => DocumentType::CPF->value,
-        'document_number' => '123.456.789-01',
-        'phone' => '(11) 98888-7777',
         'country_code' => 'BR',
-        'birth_date' => '1995-05-20',
-        'password' => 'password123',
-        'password_confirmation' => 'password123',
-    ];
+        'password' => 'SafePass123!',
+        'password_confirmation' => 'SafePass123!',
+    ], $overrides);
+}
+
+test('should register a new user successfully with all valid fields', function () {
+    $userData = validRegistrationPayload();
 
     $response = postJson(route('auth.register'), $userData);
 
@@ -24,80 +24,72 @@ test('should register a new user successfully with all fields and sanitize data'
         ->assertJsonStructure(['data' => ['id', 'name', 'email']]);
 
     assertDatabaseHas('users', [
-        'email'           => 'register@example.com',
-        'document_number' => '12345678901',
-        'phone'           => '11988887777',
-        'document_type'   => DocumentType::CPF->value,
+        'email' => 'register@example.com',
+        'country_code' => 'BR',
     ]);
 
     assertAuthenticated();
 });
 
-test('should register successfully with only mandatory fields', function () {
-    $userData = [
-        'name' => 'Simple User',
-        'email' => 'simple@example.com',
-        'password' => 'password123',
-        'password_confirmation' => 'password123',
-    ];
-
-    $response = postJson(route('auth.register'), $userData);
-
-    $response->assertStatus(201);
-    assertDatabaseHas('users', ['email' => 'simple@example.com']);
-});
-
 test('should fail registration if email is already taken', function () {
     User::factory()->create(['email' => 'existing@example.com']);
 
-    postJson(route('auth.register'), [
-        'name' => 'New User',
-        'email' => 'existing@example.com',
-        'password' => 'password123',
-        'password_confirmation' => 'password123',
-    ])
+    $payload = validRegistrationPayload(['email' => 'existing@example.com']);
+
+    postJson(route('auth.register'), $payload)
         ->assertStatus(422)
         ->assertJsonValidationErrors(['email']);
 });
 
-test('should fail if password confirmation does not match', function () {
-    postJson(route('auth.register'), [
-        'name' => 'Test User',
-        'email' => 'test@example.com',
-        'password' => 'password123',
-        'password_confirmation' => 'different-password',
-    ])
+test('password must have at least 10 characters', function () {
+    $payload = validRegistrationPayload([
+        'password' => 'Short12',
+        'password_confirmation' => 'Short12'
+    ]);
+
+    postJson(route('auth.register'), $payload)
         ->assertStatus(422)
         ->assertJsonValidationErrors(['password']);
 });
 
-test('should validate required fields only for mandatory information', function () {
-    postJson(route('auth.register'), [])
-        ->assertStatus(422)
-        ->assertJsonValidationErrors(['name', 'email', 'password']);
+test('password must contain at least one letter and one number', function () {
+    postJson(route('auth.register'), validRegistrationPayload([
+        'password' => '12345678910',
+        'password_confirmation' => '12345678910'
+    ]))->assertJsonValidationErrors(['password']);
+
+    postJson(route('auth.register'), validRegistrationPayload([
+        'password' => 'OnlyLettersPass',
+        'password_confirmation' => 'OnlyLettersPass'
+    ]))->assertJsonValidationErrors(['password']);
 });
 
-test('should fail if document_number format is invalid for CPF', function () {
-    postJson(route('auth.register'), [
-        'name' => 'Test User',
-        'email' => 'test@example.com',
-        'document_type' => DocumentType::CPF->value,
-        'document_number' => '123',
+test('should block compromised passwords even if they meet length requirements', function () {
+    $payload = validRegistrationPayload([
         'password' => 'password123',
-        'password_confirmation' => 'password123',
-    ])
+        'password_confirmation' => 'password123'
+    ]);
+
+    postJson(route('auth.register'), $payload)
         ->assertStatus(422)
-        ->assertJsonValidationErrors(['document_number']);
+        ->assertJsonValidationErrors(['password']);
 });
 
-test('should fail if birth_date is in the future', function () {
-    postJson(route('auth.register'), [
-        'name' => 'Test User',
-        'email' => 'test@example.com',
-        'birth_date' => now()->addDay()->format('Y-m-d'),
-        'password' => 'password123',
-        'password_confirmation' => 'password123',
-    ])
+test('should fail if password confirmation does not match', function () {
+    $payload = validRegistrationPayload([
+        'password' => 'ValidPass123',
+        'password_confirmation' => 'WrongConfirmation'
+    ]);
+
+    postJson(route('auth.register'), $payload)
         ->assertStatus(422)
-        ->assertJsonValidationErrors(['birth_date']);
+        ->assertJsonValidationErrors(['password']);
+});
+
+test('should fail if country code is not a valid enum value', function () {
+    $payload = validRegistrationPayload(['country_code' => 'XX']);
+
+    postJson(route('auth.register'), $payload)
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['country_code']);
 });

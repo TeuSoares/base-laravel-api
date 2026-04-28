@@ -17,11 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('document_type')->default('CPF');
-            $table->string('document_number')->unique()->nullable();
-            $table->string('phone', 20)->nullable();
-            $table->string('country_code', 5)->default('BR');
-            $table->date('birth_date')->nullable();
+            $table->char('country_code', 2)->default('BR');
             $table->string('language', 5)->nullable();
             $table->rememberToken();
             $table->timestamps();
