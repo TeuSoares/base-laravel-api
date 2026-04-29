@@ -6,16 +6,16 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 abstract class BaseApiException extends HttpException
 {
-    protected array $payload;
+    protected array|string|null $details;
 
-    public function __construct(array|string $message, int $statusCode = 400)
+    public function __construct(string $message, array|string|null $details = null, int $statusCode = 400)
     {
-        $this->payload = is_array($message) ? $message : ['message' => $message];
-        parent::__construct($statusCode, is_array($message) ? 'API Error' : $message);
+        $this->details = $details;
+        parent::__construct($statusCode, $message);
     }
 
-    public function getPayload(): array
+    public function getDetails(): array|string|null
     {
-        return $this->payload;
+        return $this->details;
     }
 }

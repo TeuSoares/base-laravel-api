@@ -15,9 +15,7 @@ class LoginAction extends Action
 
         if (RateLimiter::tooManyAttempts($rateLimiterKey, 5)) {
             $seconds = RateLimiter::availableIn($rateLimiterKey);
-            $this->error()->http([
-                'login' => __('auth.throttle', ['seconds' => $seconds])
-            ], 429);
+            $this->error()->http(__('auth.throttle', ['seconds' => $seconds]), status: 429);
         }
 
         if (Auth::attempt($data)) {

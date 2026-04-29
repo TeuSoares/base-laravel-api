@@ -12,9 +12,7 @@ class ForgotPasswordAction extends Action
         $status = Password::broker()->sendResetLink($data);
 
         if ($status === Password::RESET_THROTTLED) {
-            $this->error()->http([
-                'email' => [__($status)]
-            ], 429);
+            $this->error()->http(__($status), status: 429);
         }
     }
 }

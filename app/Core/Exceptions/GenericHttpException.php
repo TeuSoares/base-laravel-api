@@ -4,8 +4,11 @@ namespace App\Core\Exceptions;
 
 class GenericHttpException extends BaseApiException
 {
-    public function __construct(array|string $message, int $statusCode = 400)
-    {
-        parent::__construct($message, $statusCode);
+    public function __construct(
+        string $message,
+        int $statusCode = 400,
+        array|string|null $details = null
+    ) {
+        parent::__construct($message, $details, $statusCode);
     }
 }

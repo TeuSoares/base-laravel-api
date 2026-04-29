@@ -28,16 +28,19 @@ class ResponseBuilder
         return self::build(['message' => $message], $status);
     }
 
-    public function error(array|string $error, int $status = 400, ?string $message = null): JsonResponse
+    public function error(string $message, array|null $error = null, int $status = 400): JsonResponse
     {
-        if (is_string($error)) {
-            $error = ['message' => $error];
+        $data = [
+            'message' => $message,
+        ];
+
+        if ($error !== null && $error !== []) {
+            $data['errors'] = array_map(function ($value) {
+                return is_array($value) ? $value : [$value];
+            }, $error);
         }
 
-        return self::build([
-            'message' => $message ?? 'Request failed',
-            'errors' => $error
-        ], $status);
+        return self::build($data, $status);
     }
 
     public function paginated(AbstractPaginator $pagination, int $status = 200): JsonResponse
