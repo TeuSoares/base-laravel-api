@@ -39,7 +39,7 @@ test('should fail reset if token is invalid', function () {
         'password_confirmation' => 'SafePass123!',
     ])
         ->assertStatus(422)
-        ->assertJsonValidationErrors(['email']);
+        ->assertJsonPath('message', __('passwords.token'));
 });
 
 test('should validate password requirements', function () {

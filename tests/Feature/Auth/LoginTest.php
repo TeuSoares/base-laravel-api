@@ -37,8 +37,7 @@ test('should fail login with incorrect password', function () {
         'email' => 'test@example.com',
         'password' => 'wrong-password',
     ])
-        ->assertStatus(422)
-        ->assertJsonValidationErrors(['login']);
+        ->assertStatus(401);
 
     assertGuest();
 });
@@ -94,8 +93,8 @@ test('should fail login if user does not exist', function () {
         'email' => 'nonexistent@example.com',
         'password' => 'password123',
     ])
-        ->assertStatus(422)
-        ->assertJsonValidationErrors(['login' => __('auth.invalid_credentials')]);
+        ->assertStatus(401)
+        ->assertJsonPath('message', __('auth.invalid_credentials'));
 
     assertGuest();
 });

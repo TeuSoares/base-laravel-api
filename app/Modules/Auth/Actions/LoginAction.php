@@ -25,8 +25,6 @@ class LoginAction extends Action
 
         RateLimiter::hit($rateLimiterKey, 300);
 
-        return $this->error()->validation([
-            'login' => [__('auth.invalid_credentials')]
-        ]);
+        return $this->error()->http(__('auth.invalid_credentials'), status: 401);
     }
 }

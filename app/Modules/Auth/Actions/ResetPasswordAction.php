@@ -20,9 +20,13 @@ class ResetPasswordAction extends Action
         );
 
         if ($status !== Password::PASSWORD_RESET) {
-            $this->error()->validation([
-                'email' => [__($status)]
-            ]);
+            if ($status === Password::INVALID_USER) {
+                $this->error()->validation([
+                    'email' => [__($status)]
+                ]);
+            }
+
+            $this->error()->http(__($status), status: 422);
         }
     }
 
