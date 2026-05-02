@@ -39,7 +39,7 @@ class User extends Authenticatable
     {
         $baseUrl = config('app.frontend_url', env('FRONT_URL'));
 
-        $url = "{$baseUrl}/password/reset/{$token}?email=" . urlencode($this->email);
+        $url = "{$baseUrl}/reset-password/{$token}?email=" . urlencode($this->email);
 
         $this->notify(new ResetPasswordNotification($url, $this->name));
     }

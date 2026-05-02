@@ -9,7 +9,7 @@ return [
     'throttle' => 'Limite atingido, tente novamente em :seconds segundos!',
     'forbidden' => 'Você não tem permissão para realizar esta ação.',
     'not_subscribed' => 'Acesso restrito a assinantes. Por favor, verifique seu plano para continuar.',
-    'forgot_password_info' => 'Se o e-mail <strong>:email</strong> estiver cadastrado em nossa base, você receberá um link de redefinição em instantes.',
+    'forgot_password_info' => 'Link de recuperação enviado! Se você possui uma conta conosco, o e-mail chegará em breve. Não esqueça de conferir sua caixa de spam.',
     'reset_password_mail' => [
         'subject' => ':app - Redefinição de Senha',
         'greeting' => 'Olá, :name',

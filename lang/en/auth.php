@@ -9,7 +9,7 @@ return [
     'throttle' => 'Limit reached, please try again in :seconds seconds!',
     'forbidden' => 'You do not have permission to perform this action.',
     'not_subscribed' => 'Subscribers only. Please check your plan to continue.',
-    'forgot_password_info' => 'If the email <strong>:email</strong> is in our database, you will receive a reset link shortly.',
+    'forgot_password_info' => 'Recovery link sent! If registered, an email will arrive shortly. Please check your spam if you don\'t see it.',
     'reset_password_mail' => [
         'subject' => ':app - Password Reset',
         'greeting' => 'Hello, :name',
