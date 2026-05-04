@@ -20,7 +20,7 @@ class RegisterRequest extends Request
                 Password::min(10)
                     ->letters()
                     ->numbers()
-                    ->uncompromised(),
+                    ->uncompromised(threshold: 3)
             ],
             'password_confirmation' => 'required',
             'country_code' => [

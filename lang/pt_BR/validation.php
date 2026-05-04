@@ -126,7 +126,7 @@ return [
         'mixed' => 'O campo :attribute deve conter pelo menos uma letra maiúscula e uma minúscula.',
         'numbers' => 'O campo :attribute deve conter pelo menos um número.',
         'symbols' => 'O campo :attribute deve conter pelo menos um símbolo.',
-        'uncompromised' => 'Senha muito previsível. Por favor, escolha uma senha diferente.',
+        'uncompromised' => 'Esta senha é muito comum na internet e fácil de adivinhar. Por favor, tente uma combinação mais exclusiva.',
     ],
     'present' => 'O campo :attribute deve estar presente.',
     'present_if' => 'O campo :attribute deve estar presente quando :other é :value.',

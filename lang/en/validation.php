@@ -126,7 +126,7 @@ return [
         'mixed' => 'The :attribute field must contain at least one uppercase and one lowercase letter.',
         'numbers' => 'The :attribute field must contain at least one number.',
         'symbols' => 'The :attribute field must contain at least one symbol.',
-        'uncompromised' => 'This password is too common. Please choose a different password.',
+        'uncompromised' => 'This password is too common and easily guessed. Please choose a more unique combination.',
     ],
     'present' => 'The :attribute field must be present.',
     'present_if' => 'The :attribute field must be present when :other is :value.',
