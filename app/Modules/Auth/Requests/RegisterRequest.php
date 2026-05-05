@@ -3,8 +3,6 @@
 namespace App\Modules\Auth\Requests;
 
 use App\Core\Abstracts\Request;
-use App\Core\Enums\CountryCode;
-use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends Request
@@ -23,10 +21,13 @@ class RegisterRequest extends Request
                     ->uncompromised(threshold: 3)
             ],
             'password_confirmation' => 'required',
-            'country_code' => [
-                'required',
-                new Enum(CountryCode::class)
-            ],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'email' => strtolower(trim($this->email)),
+        ]);
     }
 }

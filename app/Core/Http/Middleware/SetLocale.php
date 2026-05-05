@@ -15,24 +15,19 @@ class SetLocale
 
         if ($user && $user->language instanceof UserLanguage) {
             app()->setLocale($user->language->value);
-        } else {
-            $locale = $this->parseLocale($request->header('Accept-Language'));
+            return $next($request);
+        }
 
-            if (UserLanguage::tryFrom($locale)) {
-                app()->setLocale($locale);
-            }
+        $preferred = $request->getPreferredLanguage();
+
+        if ($preferred) {
+            $normalized = str_replace('-', '_', $preferred);
+
+            $language = UserLanguage::tryFrom($normalized);
+
+            if ($language) app()->setLocale($language->value);
         }
 
         return $next($request);
-    }
-
-    private function parseLocale(?string $header): string
-    {
-        if (!$header) return config('app.locale');
-
-        $firstPart = explode(',', $header)[0];
-        $locale = str_replace('-', '_', $firstPart);
-
-        return substr($locale, 0, 5);
     }
 }

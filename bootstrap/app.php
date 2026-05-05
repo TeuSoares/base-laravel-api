@@ -21,7 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->prepend(SetLocale::class);
+        $middleware->api(append: [
+            SetLocale::class,
+        ]);
 
         $middleware->statefulApi();
 

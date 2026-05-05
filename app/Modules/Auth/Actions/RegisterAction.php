@@ -10,7 +10,11 @@ class RegisterAction extends Action
 {
     public function execute(array $data): User
     {
-        $user = User::create($data);
+        $user = User::create([
+            'name'         => $data['name'],
+            'email'        => $data['email'],
+            'password'     => $data['password'],
+        ]);
 
         Auth::login($user);
 

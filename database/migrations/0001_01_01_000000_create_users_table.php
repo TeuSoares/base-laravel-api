@@ -1,5 +1,6 @@
 <?php
 
+use App\Core\Enums\UserLanguage;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,8 +18,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->char('country_code', 2)->default('BR');
-            $table->string('language', 5)->nullable();
+            $table->string('language', 5)->default(UserLanguage::EN->value);
+            $table->char('country_code', 2)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

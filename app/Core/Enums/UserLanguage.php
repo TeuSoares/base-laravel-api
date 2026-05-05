@@ -10,10 +10,15 @@ enum UserLanguage: string
 
     public function label(): string
     {
+        return __("languages.{$this->value}");
+    }
+
+    public function flag(): string
+    {
         return match ($this) {
-            self::PT_BR => 'Português (Brasil)',
-            self::EN    => 'English',
-            self::ES    => 'Español',
+            self::PT_BR => '🇧🇷',
+            self::EN    => '🇺🇸',
+            self::ES    => 'es',
         };
     }
 
@@ -21,7 +26,7 @@ enum UserLanguage: string
     {
         return collect(self::cases())->map(fn($case) => [
             'value' => $case->value,
-            'label' => $case->label(),
+            'label' => "{$case->flag()} {$case->label()}",
         ])->toArray();
     }
 }

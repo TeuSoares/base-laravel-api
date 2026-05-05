@@ -8,7 +8,6 @@ function validRegistrationPayload(array $overrides = []): array
     return array_merge([
         'name' => 'Test User',
         'email' => 'register@example.com',
-        'country_code' => 'BR',
         'password' => 'SafePass123!',
         'password_confirmation' => 'SafePass123!',
     ], $overrides);
@@ -25,7 +24,6 @@ test('should register a new user successfully with all valid fields', function (
 
     assertDatabaseHas('users', [
         'email' => 'register@example.com',
-        'country_code' => 'BR',
     ]);
 
     assertAuthenticated();
@@ -84,12 +82,4 @@ test('should fail if password confirmation does not match', function () {
     postJson(route('auth.register'), $payload)
         ->assertStatus(422)
         ->assertJsonValidationErrors(['password']);
-});
-
-test('should fail if country code is not a valid enum value', function () {
-    $payload = validRegistrationPayload(['country_code' => 'XX']);
-
-    postJson(route('auth.register'), $payload)
-        ->assertStatus(422)
-        ->assertJsonValidationErrors(['country_code']);
 });
