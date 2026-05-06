@@ -11,6 +11,7 @@ class LoginRequest extends Request
         return [
             'email' => 'required|email',
             'password' => 'required|string',
+            'remember' => 'sometimes|boolean',
         ];
     }
 }

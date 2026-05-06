@@ -3,6 +3,7 @@
 namespace App\Modules\Auth\Controllers;
 
 use App\Core\Http\Controllers\Controller;
+use App\Core\Traits\ManagesAuthCookies;
 use App\Modules\Auth\Actions\ForgotPasswordAction;
 use App\Modules\Auth\Actions\LoginAction;
 use App\Modules\Auth\Actions\LogoutAction;
@@ -17,15 +18,17 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
+    use ManagesAuthCookies;
+
     public function login(LoginRequest $request, LoginAction $loginAction): JsonResponse
     {
         $user = $loginAction->execute($request->validated());
 
-        if ($request->hasSession()) {
-            $request->session()->regenerate();
-        }
+        if ($request->hasSession()) $request->session()->regenerate();
 
-        return $this->response()->data(data: $user, message: __('auth.login_success'));
+        return $this->response()
+            ->data(data: $user, message: __('auth.login_success'))
+            ->withCookie($this->setAuthCookie($request->boolean('remember')));
     }
 
     public function logout(Request $request, LogoutAction $logoutAction): JsonResponse
@@ -37,18 +40,20 @@ class AuthController extends Controller
             $request->session()->regenerateToken();
         }
 
-        return $this->response()->message(__('auth.logout_success'));
+        return $this->response()
+            ->message(__('auth.logout_success'))
+            ->withCookie($this->clearAuthCookie());
     }
 
     public function register(RegisterRequest $request, RegisterAction $registerAction): JsonResponse
     {
         $user = $registerAction->execute($request->validated());
 
-        if ($request->hasSession()) {
-            $request->session()->regenerate();
-        }
+        if ($request->hasSession()) $request->session()->regenerate();
 
-        return $this->response()->data(data: $user, message: __('auth.register_success'), status: 201);
+        return $this->response()
+            ->data(data: $user, message: __('auth.register_success'), status: 201)
+            ->withCookie($this->setAuthCookie());
     }
 
     public function forgotPassword(ForgotPasswordRequest $request, ForgotPasswordAction $forgotPasswordAction): JsonResponse

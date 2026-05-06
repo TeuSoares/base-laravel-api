@@ -36,6 +36,8 @@ return [
 
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
+    'remember_lifetime' => env('SESSION_REMEMBER_LIFETIME', 43200),
+
     /*
     |--------------------------------------------------------------------------
     | Session Encryption
@@ -129,7 +131,7 @@ return [
 
     'cookie' => env(
         'SESSION_COOKIE',
-        Str::slug((string) env('APP_NAME', 'laravel')).'-session'
+        Str::slug((string) env('APP_NAME', 'laravel')) . '-session'
     ),
 
     /*

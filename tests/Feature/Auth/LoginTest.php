@@ -37,7 +37,8 @@ test('should fail login with incorrect password', function () {
         'email' => 'test@example.com',
         'password' => 'wrong-password',
     ])
-        ->assertStatus(401);
+        ->assertStatus(401)
+        ->assertCookieMissing('app_is_logged');
 
     assertGuest();
 });
@@ -97,4 +98,19 @@ test('should fail login if user does not exist', function () {
         ->assertJsonPath('message', __('auth.invalid_credentials'));
 
     assertGuest();
+});
+
+test('should set long lived cookies when remember is provided', function () {
+    User::factory()->create([
+        'email' => 'test@example.com',
+        'password' => 'password123',
+    ]);
+
+    $response = postJson(route('auth.login'), [
+        'email' => 'test@example.com',
+        'password' => 'password123',
+        'remember' => true,
+    ]);
+
+    $response->assertOk();
 });

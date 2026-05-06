@@ -18,7 +18,11 @@ class LoginAction extends Action
             $this->error()->http(__('auth.throttle', ['seconds' => $seconds]), status: 429);
         }
 
-        if (Auth::attempt($data)) {
+        $remember = $data['remember'] ?? false;
+
+        $credentials = collect($data)->except('remember')->toArray();
+
+        if (Auth::attempt($credentials, $remember)) {
             RateLimiter::clear($rateLimiterKey);
             return Auth::user();
         }
