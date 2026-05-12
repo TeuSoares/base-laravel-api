@@ -3,6 +3,7 @@
 namespace App\Modules\Auth\Requests;
 
 use App\Core\Abstracts\Request;
+use App\Core\Enums\UserLanguage;
 use Illuminate\Validation\Rules\Password;
 
 class RegisterRequest extends Request
@@ -21,6 +22,7 @@ class RegisterRequest extends Request
                     ->uncompromised(threshold: 3)
             ],
             'password_confirmation' => 'required',
+            'language' => 'required|in:' . implode(',', UserLanguage::values()),
         ];
     }
 
@@ -28,6 +30,7 @@ class RegisterRequest extends Request
     {
         $this->merge([
             'email' => strtolower(trim($this->email)),
+            'language' => $this->language ?? 'en',
         ]);
     }
 }

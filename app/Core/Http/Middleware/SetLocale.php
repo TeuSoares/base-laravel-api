@@ -11,21 +11,27 @@ class SetLocale
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
+        $locale = null;
 
-        if ($user && $user->language instanceof UserLanguage) {
-            app()->setLocale($user->language->value);
-            return $next($request);
+        $user = $request->user();
+        if ($user && isset($user->language)) {
+            $locale = $user->language instanceof UserLanguage
+                ? $user->language->value
+                : $user->language;
         }
 
-        $preferred = $request->getPreferredLanguage();
+        if (!$locale) {
+            $locale = $request->header('X-User-Language') ?: $request->cookie('user_language');
+        }
 
-        if ($preferred) {
-            $normalized = str_replace('-', '_', $preferred);
+        if (!$locale) {
+            $locale = $request->getPreferredLanguage(UserLanguage::values());
+        }
 
-            $language = UserLanguage::tryFrom($normalized);
+        $locale = $locale ?: config('app.locale');
 
-            if ($language) app()->setLocale($language->value);
+        if (in_array($locale, UserLanguage::values())) {
+            app()->setLocale($locale);
         }
 
         return $next($request);

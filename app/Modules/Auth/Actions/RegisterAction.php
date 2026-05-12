@@ -14,6 +14,7 @@ class RegisterAction extends Action
             'name'         => $data['name'],
             'email'        => $data['email'],
             'password'     => $data['password'],
+            'language'     => $data['language'],
         ]);
 
         Auth::login($user);

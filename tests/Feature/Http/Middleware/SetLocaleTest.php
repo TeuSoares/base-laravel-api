@@ -5,28 +5,45 @@ use App\Core\Enums\UserLanguage;
 use Illuminate\Support\Facades\App;
 use function Pest\Laravel\{actingAs, postJson};
 
-it('sets the application locale correctly based on header', function (string $header, string $expectedLocale) {
-    postJson(route('auth.login'), [], ['Accept-Language' => $header]);
+beforeEach(function () {
+    App::setLocale('en');
+});
 
-    expect(App::getLocale())->toBe($expectedLocale);
-})->with([
-    ['pt_BR', 'pt_BR'],
-    ['pt-BR', 'pt_BR'],
-    ['en', 'en'],
-    ['es', 'es'],
-]);
-
-it('prioritizes logged user preference over header', function () {
+it('prioritizes logged user preference over header and browser', function () {
     $user = User::factory()->create(['language' => UserLanguage::EN]);
 
-    actingAs($user)
-        ->postJson(route('auth.login'), [], ['Accept-Language' => 'pt_BR']);
+    actingAs($user)->postJson(route('auth.login'), [], [
+        'X-User-Language' => 'es',
+        'Accept-Language' => 'pt_BR'
+    ]);
 
     expect(App::getLocale())->toBe('en');
 });
 
-it('uses system default when header provides unsupported language', function () {
-    postJson(route('auth.login'), [], ['Accept-Language' => 'fr']);
+it('prioritizes X-User-Language header over browser accept-language', function () {
+    postJson(route('auth.login'), [], [
+        'X-User-Language' => 'es',
+        'Accept-Language' => 'pt_BR'
+    ]);
 
-    expect(App::getLocale())->toBe(config('app.locale'));
+    expect(App::getLocale())->toBe('es');
+});
+
+it('uses browser preference when no user and no custom header', function () {
+    postJson(route('auth.login'), [], [
+        'Accept-Language' => 'pt-BR'
+    ]);
+
+    expect(App::getLocale())->toBe('pt_BR');
+});
+
+it('falls back to default for unsupported languages', function () {
+    $default = config('app.locale');
+
+    postJson(route('auth.login'), [], [
+        'X-User-Language' => 'fr',
+        'Accept-Language' => 'it'
+    ]);
+
+    expect(App::getLocale())->toBe($default);
 });

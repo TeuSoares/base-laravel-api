@@ -10,6 +10,7 @@ function validRegistrationPayload(array $overrides = []): array
         'email' => 'register@example.com',
         'password' => 'SafePass123!',
         'password_confirmation' => 'SafePass123!',
+        'language' => 'en',
     ], $overrides);
 }
 
@@ -20,7 +21,7 @@ test('should register a new user successfully with all valid fields', function (
 
     $response->assertStatus(201)
         ->assertJsonPath('message', __('auth.register_success'))
-        ->assertJsonStructure(['data' => ['id', 'name', 'email']]);
+        ->assertJsonStructure(['data' => ['id', 'name', 'email', 'language']]);
 
     assertDatabaseHas('users', [
         'email' => 'register@example.com',
@@ -82,4 +83,12 @@ test('should fail if password confirmation does not match', function () {
     postJson(route('auth.register'), $payload)
         ->assertStatus(422)
         ->assertJsonValidationErrors(['password']);
+});
+
+test('should fail if language is not supported', function () {
+    $payload = validRegistrationPayload(['language' => 'unsupported']);
+
+    postJson(route('auth.register'), $payload)
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['language']);
 });
