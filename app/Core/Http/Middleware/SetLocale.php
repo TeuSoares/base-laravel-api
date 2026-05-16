@@ -14,6 +14,7 @@ class SetLocale
         $locale = null;
 
         $user = $request->user();
+
         if ($user && isset($user->language)) {
             $locale = $user->language instanceof UserLanguage
                 ? $user->language->value
@@ -25,11 +26,18 @@ class SetLocale
         }
 
         if (!$locale) {
-            $availableLocales = array_map(fn($lang) => str_replace('_', '-', $lang), UserLanguage::values());
+            $acceptLanguage = $request->header('Accept-Language');
 
-            $preferred = $request->getPreferredLanguage($availableLocales);
+            if ($acceptLanguage) {
+                $firstLanguage = explode(',', $acceptLanguage)[0];
+                $baseLanguage = preg_split('/[-_]/', trim($firstLanguage))[0];
 
-            $locale = $preferred ? str_replace('-', '_', $preferred) : null;
+                if ($baseLanguage === 'pt') {
+                    $locale = 'pt_BR';
+                } elseif (in_array($baseLanguage, UserLanguage::values())) {
+                    $locale = $baseLanguage;
+                }
+            }
         }
 
         $locale = $locale ?? config('app.locale');
