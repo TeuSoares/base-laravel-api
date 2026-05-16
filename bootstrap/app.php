@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: [
             'app_is_logged',
+            'user_language'
         ]);
 
         $middleware->api(append: [

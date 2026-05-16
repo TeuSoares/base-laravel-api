@@ -21,14 +21,18 @@ class SetLocale
         }
 
         if (!$locale) {
-            $locale = $request->header('X-User-Language') ?: $request->cookie('user_language');
+            $locale = $request->header('X-User-Language') ?? $request->cookie('user_language');
         }
 
         if (!$locale) {
-            $locale = $request->getPreferredLanguage(UserLanguage::values());
+            $availableLocales = array_map(fn($lang) => str_replace('_', '-', $lang), UserLanguage::values());
+
+            $preferred = $request->getPreferredLanguage($availableLocales);
+
+            $locale = $preferred ? str_replace('-', '_', $preferred) : null;
         }
 
-        $locale = $locale ?: config('app.locale');
+        $locale = $locale ?? config('app.locale');
 
         if (in_array($locale, UserLanguage::values())) {
             app()->setLocale($locale);
