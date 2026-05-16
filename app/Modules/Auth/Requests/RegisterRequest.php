@@ -30,7 +30,7 @@ class RegisterRequest extends Request
     {
         $this->merge([
             'email' => strtolower(trim($this->email)),
-            'language' => $this->language ?? 'en',
+            'language' => str_replace('-', '_', $this->language),
         ]);
     }
 }
