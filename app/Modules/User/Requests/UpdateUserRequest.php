@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Modules\Auth\Requests;
+// app/Modules/User/Requests/UpdateUserRequest.php
+namespace App\Modules\User\Requests;
 
 use App\Core\Abstracts\Request;
 use App\Core\Traits\HasUserRules;
 
-class RegisterRequest extends Request
+class UpdateUserRequest extends Request
 {
     use HasUserRules;
 
     public function rules(): array
     {
         return [
-            ...$this->userRules(),
-            ...$this->passwordRules(required: true),
+            ...$this->userRules(isUpdate: true),
+            ...$this->passwordRules(required: false),
         ];
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Auth\Controllers\AuthController;
+use App\Modules\User\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')
@@ -16,4 +17,11 @@ Route::prefix('auth')
             Route::post('logout', [AuthController::class, 'logout'])->name('logout');
             Route::get('me', [AuthController::class, 'me'])->name('me');
         });
+    });
+
+Route::prefix('user')
+    ->name('user.')
+    ->middleware(['api', 'auth:web'])
+    ->group(function () {
+        Route::patch('/', [UserController::class, 'update'])->name('update');
     });
