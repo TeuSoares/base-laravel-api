@@ -10,10 +10,12 @@ trait HasUserRules
 {
     protected function userRules(bool $isUpdate = false): array
     {
+        $required = $isUpdate ? 'sometimes|required' : 'required';
+
         return [
-            'name'     => 'required|string|max:100',
+            'name'     => $required . '|string|max:100',
             'email'    => [
-                'required',
+                $required,
                 'email',
                 'max:255',
                 $isUpdate
@@ -21,7 +23,11 @@ trait HasUserRules
                     ? Rule::unique('users', 'email')->ignore($this->user()->id)
                     : Rule::unique('users', 'email'),
             ],
-            'language' => 'required|in:' . implode(',', UserLanguage::values()),
+            'language' => [
+                $required,
+                'string',
+                Rule::in(UserLanguage::values()),
+            ],
         ];
     }
 

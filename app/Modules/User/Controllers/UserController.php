@@ -18,7 +18,9 @@ class UserController extends Controller
         $data = $request->validated();
         $user = $request->user();
 
-        $user = $updateUser->execute($user, $data);
+        if (filled($data['name'] ?? null) || filled($data['email'] ?? null)) {
+            $user = $updateUser->execute($user, $data);
+        }
 
         if (filled($data['password'] ?? null)) {
             $updatePassword->execute($user, $data['password']);
