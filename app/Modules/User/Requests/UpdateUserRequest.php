@@ -1,6 +1,5 @@
 <?php
 
-// app/Modules/User/Requests/UpdateUserRequest.php
 namespace App\Modules\User\Requests;
 
 use App\Core\Abstracts\Request;
@@ -12,9 +11,14 @@ class UpdateUserRequest extends Request
 
     public function rules(): array
     {
+        $passwordRules = $this->has('password') && filled($this->password)
+            ? ['required', 'current_password']
+            : ['nullable'];
+
         return [
-            ...$this->userRules(isUpdate: true),
+            ...$this->userRules(required: false),
             ...$this->passwordRules(required: false),
+            'current_password' => $passwordRules,
         ];
     }
 

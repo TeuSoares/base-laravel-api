@@ -43,10 +43,13 @@ test('should update name, email and language successfully', function () {
 });
 
 test('should update password when provided', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'password' => 'password', // Default password set by factory
+    ]);
 
     actingAs($user)
         ->patchJson(route('user.update'), validUpdatePayload([
+            'current_password'      => 'password',
             'password'              => 'Xk9#mP2$vQr8',
             'password_confirmation' => 'Xk9#mP2$vQr8',
         ]))

@@ -8,23 +8,22 @@ use Illuminate\Validation\Rules\Password;
 
 trait HasUserRules
 {
-    protected function userRules(bool $isUpdate = false): array
+    protected function userRules(bool $required = true): array
     {
-        $required = $isUpdate ? 'sometimes|required' : 'required';
+        $rules = $required ? ['required'] : ['sometimes', 'required'];
 
         return [
-            'name'     => $required . '|string|max:100',
-            'email'    => [
-                $required,
+            'name' => [...$rules, 'string', 'max:100'],
+            'email' => [
+                ...$rules,
                 'email',
                 'max:255',
-                $isUpdate
-                    // Ignore the authenticated user's own email on uniqueness check
+                !$required
                     ? Rule::unique('users', 'email')->ignore($this->user()->id)
                     : Rule::unique('users', 'email'),
             ],
             'language' => [
-                $required,
+                ...$rules,
                 'string',
                 Rule::in(UserLanguage::values()),
             ],
@@ -47,9 +46,18 @@ trait HasUserRules
 
     protected function prepareUserData(): void
     {
-        $this->merge([
-            'email'    => strtolower(trim($this->email ?? '')),
-            'language' => str_replace('-', '_', $this->language ?? ''),
-        ]);
+        $data = [];
+
+        if ($this->has('email')) {
+            $data['email'] = strtolower(trim($this->email ?? ''));
+        }
+
+        if ($this->has('language')) {
+            $data['language'] = str_replace('-', '_', $this->language ?? '');
+        }
+
+        if (!empty($data)) {
+            $this->merge($data);
+        }
     }
 }
