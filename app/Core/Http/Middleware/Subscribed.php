@@ -8,17 +8,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Subscribed
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  Closure(Request): (Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
-
-        if (!$user->subscribed()) {
-            throwApi()->forbidden(__('auth.not_subscribed'));
+        if (!$request->user()?->subscribed('default')) {
+            return responseBuilder()->error(
+                message: __('billing.not_subscribed'),
+                status: Response::HTTP_FORBIDDEN,
+            );
         }
 
         return $next($request);

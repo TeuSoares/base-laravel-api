@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
 
 #[Fillable([
@@ -24,7 +25,7 @@ use Laravel\Sanctum\HasApiTokens;
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements HasLocalePreference
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Billable;
 
     protected function casts(): array
     {
@@ -48,10 +49,5 @@ class User extends Authenticatable implements HasLocalePreference
         $url = "{$baseUrl}/reset-password/{$token}?email=" . urlencode($this->email);
 
         $this->notify(new ResetPasswordNotification($url, $this->name));
-    }
-
-    public function subscribed()
-    {
-        //
     }
 }

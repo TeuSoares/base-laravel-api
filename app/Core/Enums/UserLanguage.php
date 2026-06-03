@@ -12,4 +12,13 @@ enum UserLanguage: string
     {
         return array_column(self::cases(), 'value');
     }
+
+    public function toGatewayLocale(): string
+    {
+        return match ($this) {
+            self::EN    => 'en',
+            self::PT_BR => 'pt',
+            self::ES    => 'es',
+        };
+    }
 }

@@ -1,8 +1,20 @@
 <?php
 
+use App\Core\Http\Middleware\Subscribed;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use function Pest\Laravel\{actingAs, patchJson, assertDatabaseHas};
+use function Pest\Laravel\{actingAs, assertDatabaseHas, patchJson};
+
+uses()->beforeEach(function () {
+    $this->withoutMiddleware(Subscribed::class);
+})->in(__FILE__);
+
+function createUserForUpdate(array $overrides = []): User
+{
+    /** @var User $user */
+    $user = User::factory()->create(array_merge(['language' => 'en'], $overrides));
+    return $user;
+}
 
 function validUpdatePayload(array $overrides = []): array
 {
@@ -23,7 +35,7 @@ test('should require authentication to update user', function () {
 // ─── Successful updates ───────────────────────────────────────────────────────
 
 test('should update name, email and language successfully', function () {
-    $user = User::factory()->create();
+    $user = createUserForUpdate();
 
     actingAs($user)
         ->patchJson(route('user.update'), validUpdatePayload([
@@ -43,9 +55,7 @@ test('should update name, email and language successfully', function () {
 });
 
 test('should update password when provided', function () {
-    $user = User::factory()->create([
-        'password' => 'password', // Default password set by factory
-    ]);
+    $user = createUserForUpdate(['password' => 'password']);
 
     actingAs($user)
         ->patchJson(route('user.update'), validUpdatePayload([
@@ -59,7 +69,7 @@ test('should update password when provided', function () {
 });
 
 test('should keep existing password when not provided', function () {
-    $user = User::factory()->create();
+    $user = createUserForUpdate();
     $originalPassword = $user->password;
 
     actingAs($user)
@@ -70,7 +80,7 @@ test('should keep existing password when not provided', function () {
 });
 
 test('should accept own email without unique violation', function () {
-    $user = User::factory()->create(['email' => 'john@example.com']);
+    $user = createUserForUpdate(['email' => 'john@example.com']);
 
     actingAs($user)
         ->patchJson(route('user.update'), validUpdatePayload(['email' => 'john@example.com']))
@@ -78,7 +88,7 @@ test('should accept own email without unique violation', function () {
 });
 
 test('should trim and lowercase email before saving', function () {
-    $user = User::factory()->create();
+    $user = createUserForUpdate();
 
     actingAs($user)
         ->patchJson(route('user.update'), validUpdatePayload(['email' => '  JOHN@EXAMPLE.COM  ']))
@@ -93,7 +103,7 @@ test('should trim and lowercase email before saving', function () {
 // ─── Validation ───────────────────────────────────────────────────────────────
 
 test('should fail if name is missing', function () {
-    $user = User::factory()->create();
+    $user = createUserForUpdate();
 
     actingAs($user)
         ->patchJson(route('user.update'), validUpdatePayload(['name' => '']))
@@ -102,7 +112,7 @@ test('should fail if name is missing', function () {
 });
 
 test('should fail if email is missing', function () {
-    $user = User::factory()->create();
+    $user = createUserForUpdate();
 
     actingAs($user)
         ->patchJson(route('user.update'), validUpdatePayload(['email' => '']))
@@ -111,7 +121,7 @@ test('should fail if email is missing', function () {
 });
 
 test('should fail if email format is invalid', function () {
-    $user = User::factory()->create();
+    $user = createUserForUpdate();
 
     actingAs($user)
         ->patchJson(route('user.update'), validUpdatePayload(['email' => 'not-an-email']))
@@ -121,7 +131,7 @@ test('should fail if email format is invalid', function () {
 
 test('should fail if email is already taken by another user', function () {
     User::factory()->create(['email' => 'taken@example.com']);
-    $user = User::factory()->create();
+    $user = createUserForUpdate();
 
     actingAs($user)
         ->patchJson(route('user.update'), validUpdatePayload(['email' => 'taken@example.com']))
@@ -130,7 +140,7 @@ test('should fail if email is already taken by another user', function () {
 });
 
 test('should fail if language is not supported', function () {
-    $user = User::factory()->create();
+    $user = createUserForUpdate();
 
     actingAs($user)
         ->patchJson(route('user.update'), validUpdatePayload(['language' => 'invalid']))
@@ -139,7 +149,7 @@ test('should fail if language is not supported', function () {
 });
 
 test('should fail if password has less than 10 characters', function () {
-    $user = User::factory()->create();
+    $user = createUserForUpdate();
 
     actingAs($user)
         ->patchJson(route('user.update'), validUpdatePayload([
@@ -151,7 +161,7 @@ test('should fail if password has less than 10 characters', function () {
 });
 
 test('should fail if password does not contain letters and numbers', function () {
-    $user = User::factory()->create();
+    $user = createUserForUpdate();
 
     actingAs($user)
         ->patchJson(route('user.update'), validUpdatePayload([
@@ -171,7 +181,7 @@ test('should fail if password does not contain letters and numbers', function ()
 });
 
 test('should fail if password is compromised', function () {
-    $user = User::factory()->create();
+    $user = createUserForUpdate();
 
     actingAs($user)
         ->patchJson(route('user.update'), validUpdatePayload([
@@ -183,7 +193,7 @@ test('should fail if password is compromised', function () {
 });
 
 test('should fail if password confirmation does not match', function () {
-    $user = User::factory()->create();
+    $user = createUserForUpdate();
 
     actingAs($user)
         ->patchJson(route('user.update'), validUpdatePayload([
