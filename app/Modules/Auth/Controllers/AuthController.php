@@ -13,6 +13,7 @@ use App\Modules\Auth\Requests\ForgotPasswordRequest;
 use App\Modules\Auth\Requests\LoginRequest;
 use App\Modules\Auth\Requests\RegisterRequest;
 use App\Modules\Auth\Requests\ResetPasswordRequest;
+use App\Modules\User\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -27,7 +28,7 @@ class AuthController extends Controller
         if ($request->hasSession()) $request->session()->regenerate();
 
         return $this->response()
-            ->data(data: $user, message: __('auth.login_success'))
+            ->data(data: new UserResource($user), message: __('auth.login_success'))
             ->withCookie($this->setAuthCookie($request->boolean('remember')));
     }
 
@@ -52,7 +53,7 @@ class AuthController extends Controller
         if ($request->hasSession()) $request->session()->regenerate();
 
         return $this->response()
-            ->data(data: $user, message: __('auth.register_success'), status: 201)
+            ->data(data: new UserResource($user), message: __('auth.register_success'), status: 201)
             ->withCookie($this->setAuthCookie());
     }
 
@@ -73,10 +74,5 @@ class AuthController extends Controller
     {
         $resetPasswordAction->execute($request->validated());
         return $this->response()->message(__('auth.password_reset_success'));
-    }
-
-    public function me(Request $request): JsonResponse
-    {
-        return $this->response()->data($request->user());
     }
 }

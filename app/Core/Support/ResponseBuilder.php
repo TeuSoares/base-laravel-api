@@ -3,8 +3,6 @@
 namespace App\Core\Support;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Response;
 use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Arr;
@@ -13,9 +11,7 @@ class ResponseBuilder
 {
     public function data(mixed $data, int $status = 200, ?string $message = null): JsonResponse
     {
-        if ($data instanceof JsonResource || $data instanceof AnonymousResourceCollection) {
-            $data = $data->response()->getData(true);
-        }
+        if (is_array($data) && array_key_exists('data', $data)) $data = $data['data'];
 
         return self::build([
             'data' => $data ?? [],

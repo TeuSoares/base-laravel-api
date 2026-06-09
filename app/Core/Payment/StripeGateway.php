@@ -4,6 +4,7 @@ namespace App\Core\Payment;
 
 use App\Core\Contracts\PaymentGateway;
 use App\Models\User;
+use Laravel\Cashier\Subscription;
 
 class StripeGateway implements PaymentGateway
 {
@@ -36,20 +37,12 @@ class StripeGateway implements PaymentGateway
         $user->subscription('default')?->resume();
     }
 
-    public function getSubscription(User $user): ?array
+    public function getSubscription(User $user): ?Subscription
     {
         $subscription = $user->subscription('default');
 
         if (!$subscription) return null;
 
-        return [
-            'plan'       => $subscription->stripe_price,
-            'status'     => $subscription->stripe_status,
-            'ends_at'    => $subscription->ends_at,
-            'trial_ends' => $subscription->trial_ends_at,
-            'on_trial'   => $subscription->onTrial(),
-            'cancelled'  => $subscription->cancelled(),
-            'active'     => $subscription->active(),
-        ];
+        return $subscription;
     }
 }

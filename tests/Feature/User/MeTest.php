@@ -8,7 +8,7 @@ test('should return authenticated user data', function () {
     $user = User::factory()->create();
 
     actingAs($user)
-        ->getJson(route('auth.me'))
+        ->getJson(route('me'))
         ->assertOk()
         ->assertJson([
             'data' => [
@@ -19,6 +19,6 @@ test('should return authenticated user data', function () {
 });
 
 test('should fail if user is not authenticated', function () {
-    getJson(route('auth.me'))
+    getJson(route('me'))
         ->assertStatus(401);
 });

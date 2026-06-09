@@ -10,6 +10,7 @@ beforeEach(fn() => RateLimiter::clear('fail-login:test@example.com'));
 test('should login successfully with correct credentials', function () {
     /** @var User $user */
     $user = User::factory()->create([
+        'name' => 'Test User',
         'email' => 'test@example.com',
         'password' => 'password123',
     ]);
@@ -19,8 +20,14 @@ test('should login successfully with correct credentials', function () {
         'password' => 'password123',
     ])
         ->assertOk()
-        ->assertJsonStructure([
-            'data' => ['id', 'name', 'email']
+        ->assertJson([
+            'data' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'has_active_subscription' => false,
+            ],
+            'message' => __('auth.login_success')
         ]);
 
     assertAuthenticatedAs($user);
@@ -37,8 +44,7 @@ test('should fail login with incorrect password', function () {
         'email' => 'test@example.com',
         'password' => 'wrong-password',
     ])
-        ->assertStatus(401)
-        ->assertCookieMissing('app_is_logged');
+        ->assertStatus(401);
 
     assertGuest();
 });

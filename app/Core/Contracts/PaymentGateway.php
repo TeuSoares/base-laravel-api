@@ -3,6 +3,7 @@
 namespace App\Core\Contracts;
 
 use App\Models\User;
+use Laravel\Cashier\Subscription;
 
 interface PaymentGateway
 {
@@ -10,5 +11,5 @@ interface PaymentGateway
     public function createCheckoutSession(User $user, string $planId, string $locale): string;
     public function cancelSubscription(User $user): void;
     public function resumeSubscription(User $user): void;
-    public function getSubscription(User $user): ?array;
+    public function getSubscription(User $user): ?Subscription;
 }

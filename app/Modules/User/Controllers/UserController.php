@@ -6,6 +6,7 @@ use App\Core\Http\Controllers\Controller;
 use App\Modules\User\Actions\UpdatePassword;
 use App\Modules\User\Actions\UpdateUser;
 use App\Modules\User\Requests\UpdateUserRequest;
+use App\Modules\User\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 
 class UserController extends Controller
@@ -27,6 +28,6 @@ class UserController extends Controller
         }
 
         return $this->response()
-            ->data(data: $user, message: __('user.updated'));
+            ->data(data: new UserResource($user), message: __('user.updated'));
     }
 }

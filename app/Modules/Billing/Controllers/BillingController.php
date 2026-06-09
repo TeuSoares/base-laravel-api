@@ -6,6 +6,7 @@ use App\Core\Http\Controllers\Controller;
 use App\Modules\Billing\Actions\CancelSubscription;
 use App\Modules\Billing\Actions\GetSubscription;
 use App\Modules\Billing\Actions\ResumeSubscription;
+use App\Modules\Billing\Resources\SubscriptionResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,7 @@ class BillingController extends Controller
     ): JsonResponse {
         $subscription = $getSubscription->execute($request->user());
 
-        return $this->response()->data($subscription);
+        return $this->response()->data(new SubscriptionResource($subscription));
     }
 
     public function cancel(

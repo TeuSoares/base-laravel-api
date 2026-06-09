@@ -21,7 +21,16 @@ test('should register a new user successfully with all valid fields', function (
 
     $response->assertStatus(201)
         ->assertJsonPath('message', __('auth.register_success'))
-        ->assertJsonStructure(['data' => ['id', 'name', 'email', 'language']]);
+        ->assertJsonStructure([
+            'data' => [
+                'id',
+                'name',
+                'email',
+                'has_active_subscription',
+                'subscription_status'
+            ],
+            'message'
+        ]);
 
     assertDatabaseHas('users', [
         'email' => 'register@example.com',
