@@ -7,6 +7,12 @@ use App\Modules\User\Controllers\MeController;
 use App\Modules\User\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
+
 Route::prefix('auth')
     ->name('auth.')
     ->middleware(['api'])
@@ -17,6 +23,11 @@ Route::prefix('auth')
         Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('reset-password');
     });
 
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes (no subscription required)
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['api', 'auth:web'])->group(function () {
     Route::get('me', MeController::class)->name('me');
 
@@ -26,16 +37,23 @@ Route::middleware(['api', 'auth:web'])->group(function () {
 
     Route::prefix('billing')->name('billing.')->group(function () {
         Route::post('/checkout', [CheckoutController::class, 'initiate'])->name('checkout');
-        Route::get('/', [BillingController::class, 'subscription'])->name('subscription');
-
-        // Middleware de segurança aqui
-        Route::post('/cancel', [BillingController::class, 'cancel'])->name('cancel');
-        Route::post('/resume', [BillingController::class, 'resume'])->name('resume');
     });
 });
 
+/*
+|--------------------------------------------------------------------------
+| Authenticated + Subscribed Routes
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['api', 'auth:web', 'subscribed'])->group(function () {
     Route::prefix('user')->name('user.')->group(function () {
         Route::patch('/', [UserController::class, 'update'])->name('update');
+    });
+
+    Route::prefix('billing')->name('billing.')->group(function () {
+        Route::get('/', [BillingController::class, 'subscription'])->name('subscription');
+        Route::post('/swap', [BillingController::class, 'swap'])->name('swap');
+        Route::post('/cancel', [BillingController::class, 'cancel'])->name('cancel');
+        Route::post('/resume', [BillingController::class, 'resume'])->name('resume');
     });
 });

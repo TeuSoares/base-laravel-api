@@ -6,7 +6,8 @@ use App\Core\Http\Controllers\Controller;
 use App\Modules\Billing\Actions\CancelSubscription;
 use App\Modules\Billing\Actions\GetSubscription;
 use App\Modules\Billing\Actions\ResumeSubscription;
-use App\Modules\Billing\Resources\SubscriptionResource;
+use App\Modules\Billing\Actions\SwapPlan;
+use App\Modules\Billing\Requests\SwapPlanRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -18,7 +19,7 @@ class BillingController extends Controller
     ): JsonResponse {
         $subscription = $getSubscription->execute($request->user());
 
-        return $this->response()->data(new SubscriptionResource($subscription));
+        return $this->response()->data($subscription);
     }
 
     public function cancel(
@@ -37,5 +38,14 @@ class BillingController extends Controller
         $resumeSubscription->execute($request->user());
 
         return $this->response()->message(__('billing.resumed'));
+    }
+
+    public function swap(
+        SwapPlanRequest $request,
+        SwapPlan $swapPlan,
+    ): JsonResponse {
+        $subscription = $swapPlan->execute($request->user(), $request->planId());
+
+        return $this->response()->data($subscription, message: __('billing.swapped'));
     }
 }

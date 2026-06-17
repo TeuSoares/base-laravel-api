@@ -4,6 +4,7 @@ namespace App\Core\Payment;
 
 use App\Core\Contracts\PaymentGateway;
 use App\Models\User;
+use App\Modules\Billing\Resources\SubscriptionResource;
 use Laravel\Cashier\Subscription;
 
 class StripeGateway implements PaymentGateway
@@ -37,12 +38,26 @@ class StripeGateway implements PaymentGateway
         $user->subscription('default')?->resume();
     }
 
-    public function getSubscription(User $user): ?Subscription
+    public function getSubscription(User $user): ?array
+    {
+        $subscription = $user->subscription('default');
+
+        return $subscription ? $this->toArray($subscription) : null;
+    }
+
+    public function swapPlan(User $user, string $planId): ?array
     {
         $subscription = $user->subscription('default');
 
         if (!$subscription) return null;
 
-        return $subscription;
+        $subscription->swap($planId);
+
+        return $this->getSubscription($user);
+    }
+
+    private function toArray(Subscription $subscription): array
+    {
+        return SubscriptionResource::make($subscription)->resolve();
     }
 }

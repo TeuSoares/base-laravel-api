@@ -14,6 +14,10 @@ class CreateCheckoutSession extends Action
 
     public function execute(User $user, string $planId, string $locale): string
     {
+        if ($user->subscribed('default')) {
+            $this->error()->forbidden(__('billing.already_subscribed'));
+        }
+
         return $this->gateway->createCheckoutSession($user, $planId, $locale);
     }
 }

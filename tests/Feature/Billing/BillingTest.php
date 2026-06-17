@@ -89,29 +89,121 @@ test('should fail checkout with invalid plan', function () {
         ->assertJsonValidationErrors(['plan']);
 });
 
+test('should fail checkout if user already has active subscription', function () {
+    $user = createBillingUser();
+
+    $user->subscriptions()->create([
+        'type'          => 'default',
+        'stripe_id'     => 'sub_test123',
+        'stripe_status' => 'active',
+        'stripe_price'  => 'price_test',
+        'quantity'      => 1,
+    ]);
+
+    $mock = Mockery::mock(PaymentGateway::class);
+    $mock->shouldNotReceive('createCheckoutSession');
+    app()->instance(PaymentGateway::class, $mock);
+
+    actingAs($user)
+        ->postJson(route('billing.checkout'))
+        ->assertForbidden()
+        ->assertJsonPath('message', __('billing.already_subscribed'));
+});
+
+// Swap plan tests
+
+test('should require authentication to swap plan', function () {
+    postJson(route('billing.swap'), ['plan' => 'yearly'])
+        ->assertUnauthorized();
+});
+
+test('should require subscription to swap plan', function () {
+    $user = createBillingUser();
+
+    actingAs($user)
+        ->postJson(route('billing.swap'), ['plan' => 'yearly'])
+        ->assertForbidden();
+});
+
+test('should fail swap if plan is missing', function () {
+    $user = createBillingUser();
+
+    actingAs($user)
+        ->withoutMiddleware(Subscribed::class)
+        ->postJson(route('billing.swap'))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['plan']);
+});
+
+test('should fail swap if plan is invalid', function () {
+    $user = createBillingUser();
+
+    actingAs($user)
+        ->withoutMiddleware(Subscribed::class)
+        ->postJson(route('billing.swap'), ['plan' => 'invalid'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['plan']);
+});
+
+test('should fail swap if user has no active subscription', function () {
+    $user = createBillingUser();
+
+    actingAs($user)
+        ->withoutMiddleware(Subscribed::class)
+        ->postJson(route('billing.swap'), ['plan' => 'yearly'])
+        ->assertForbidden()
+        ->assertJsonPath('message', __('billing.no_active_subscription'));
+});
+
+test('should swap plan successfully', function () {
+    $user = createBillingUser();
+
+    $user->subscriptions()->create([
+        'type'          => 'default',
+        'stripe_id'     => 'sub_test123',
+        'stripe_status' => 'active',
+        'stripe_price'  => 'price_monthly_test',
+        'quantity'      => 1,
+    ]);
+
+    $subscriptionData = [
+        'plan'      => 'price_yearly_test',
+        'status'    => 'active',
+        'active'    => true,
+        'cancelled' => false,
+    ];
+
+    $mock = Mockery::mock(PaymentGateway::class);
+    $mock->shouldReceive('swapPlan')
+        ->once()
+        ->andReturn($subscriptionData);
+    app()->instance(PaymentGateway::class, $mock);
+
+    actingAs($user)
+        ->withoutMiddleware(Subscribed::class)
+        ->postJson(route('billing.swap'), ['plan' => 'yearly'])
+        ->assertOk()
+        ->assertJsonPath('data.plan', 'price_yearly_test')
+        ->assertJsonPath('message', __('billing.swapped'));
+});
+
 // ─── Subscription management ──────────────────────────────────────────────────
 
 test('should return subscription data', function () {
     $user = createBillingUser();
 
-    $subscriptionMock = (object) [
-        'stripe_price' => 'price_monthly',
-        'stripe_status' => 'active',
-        'ends_at' => null,
-        'trial_ends_at' => null,
+    $subscriptionData = [
+        'plan'       => 'price_monthly',
+        'status'     => 'active',
+        'ends_at'    => null,
+        'trial_ends' => null,
+        'on_trial'   => false,
+        'cancelled'  => false,
+        'active'     => true,
     ];
 
-    $subscriptionMock = Mockery::mock(\Laravel\Cashier\Subscription::class);
-    $subscriptionMock->shouldReceive('getAttribute')->with('stripe_price')->andReturn('price_monthly');
-    $subscriptionMock->shouldReceive('getAttribute')->with('stripe_status')->andReturn('active');
-    $subscriptionMock->shouldReceive('getAttribute')->with('ends_at')->andReturn(null);
-    $subscriptionMock->shouldReceive('getAttribute')->with('trial_ends_at')->andReturn(null);
-    $subscriptionMock->shouldReceive('active')->andReturn(true);
-    $subscriptionMock->shouldReceive('cancelled')->andReturn(false);
-    $subscriptionMock->shouldReceive('onTrial')->andReturn(false);
-
     $mock = Mockery::mock(PaymentGateway::class);
-    $mock->shouldReceive('getSubscription')->once()->andReturn($subscriptionMock);
+    $mock->shouldReceive('getSubscription')->once()->andReturn($subscriptionData);
     app()->instance(PaymentGateway::class, $mock);
 
     actingAs($user)
