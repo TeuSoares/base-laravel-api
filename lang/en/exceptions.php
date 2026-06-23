@@ -8,4 +8,5 @@ return [
     'not_found'         => 'Resource not found.',
     'forbidden'         => 'You do not have permission to perform this action.',
     'generic_http'      => 'An error occurred while processing your request.',
+    'too_many_requests' => 'Too many requests. Please try again later.',
 ];

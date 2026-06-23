@@ -8,4 +8,5 @@ return [
     'not_found'         => 'Recurso não encontrado.',
     'forbidden'         => 'Você não tem permissão para realizar esta ação.',
     'generic_http'      => 'Ocorreu um erro ao processar sua requisição.',
+    'too_many_requests' => 'Muitas requisições. Tente novamente mais tarde.',
 ];

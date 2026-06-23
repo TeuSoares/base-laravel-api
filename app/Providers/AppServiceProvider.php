@@ -30,8 +30,9 @@ class AppServiceProvider extends ServiceProvider
                 ->by($request->user()?->id ?: $request->ip())
                 ->response(function (Request $request, array $headers) {
                     return responseBuilder()->error(
-                        ['throttle' => __('auth.throttle', ['seconds' => $headers['Retry-After']])],
-                        429
+                        message: __('exceptions.too_many_requests'),
+                        error: ['throttle' => __('auth.throttle', ['seconds' => $headers['Retry-After']])],
+                        status: 429
                     );
                 });
         });
