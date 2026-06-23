@@ -76,5 +76,5 @@ trait CanMakeModuleFiles
      * Define the stub template for the file.
      * This must be implemented by the command using this trait.
      */
-    abstract function getStub(string $name, string $namespace): string;
+    abstract protected function getStub(string $name, string $namespace): string;
 }
